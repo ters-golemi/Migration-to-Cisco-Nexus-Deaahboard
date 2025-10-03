@@ -1,0 +1,321 @@
+!
+! Cisco Nexus 9000 Series - Leaf Switch Configuration Example
+! Role: VXLAN EVPN Leaf (VTEP)
+! Pre-Migration Configuration
+!
+hostname leaf-01
+
+! Features required for VXLAN EVPN and NDFC management
+feature bgp
+feature pim
+feature ospf
+feature interface-vlan
+feature vn-segment-vlan-based
+feature nv overlay
+feature nxapi
+feature bash-shell
+feature ssh
+feature https
+feature vpc
+feature lacp
+
+! Fabric forwarding mode for anycast gateway
+fabric forwarding anycast-gateway-mac 0001.0001.0001
+
+! DNS and NTP
+ip domain-name company.local
+dns-server 8.8.8.8 8.8.4.4
+ntp server 192.168.1.10 prefer
+ntp server 192.168.1.11
+
+! Management interface
+interface mgmt0
+  description Management Interface
+  vrf member management
+  ip address 192.168.1.11/24
+  no shutdown
+
+! Management VRF
+vrf context management
+  ip route 0.0.0.0/0 192.168.1.254
+
+! VRF Definitions
+vrf context Tenant-1
+  vni 50001
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+
+vrf context Tenant-2
+  vni 50002
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+
+! Loopback interfaces
+interface loopback0
+  description Underlay Router ID
+  ip address 10.255.255.11/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+
+interface loopback1
+  description VTEP Source Interface
+  ip address 10.255.1.11/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+
+! vPC peer-link and keepalive
+vpc domain 1
+  peer-switch
+  peer-keepalive destination 192.168.1.12 source 192.168.1.11 vrf management
+  peer-gateway
+  layer3 peer-router
+  auto-recovery
+  ip arp synchronize
+
+interface port-channel1
+  description vPC Peer-Link to Leaf-02
+  switchport mode trunk
+  spanning-tree port type network
+  vpc peer-link
+
+interface Ethernet1/47
+  description vPC Peer-Link to Leaf-02 Eth1/47
+  switchport mode trunk
+  channel-group 1 mode active
+
+interface Ethernet1/48
+  description vPC Peer-Link to Leaf-02 Eth1/48
+  switchport mode trunk
+  channel-group 1 mode active
+
+! Underlay P2P interfaces to Spine switches
+interface Ethernet1/49
+  description To Spine-01 Eth1/1
+  no switchport
+  mtu 9216
+  medium p2p
+  ip address 10.1.1.2/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/50
+  description To Spine-02 Eth1/1
+  no switchport
+  mtu 9216
+  medium p2p
+  ip address 10.1.2.2/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+! OSPF Underlay Routing
+router ospf UNDERLAY
+  router-id 10.255.255.11
+
+! PIM Configuration
+ip pim rp-address 10.255.255.254 group-list 239.0.0.0/8
+ip pim ssm range 232.0.0.0/8
+
+! VLAN Configuration
+vlan 100
+  name VLAN_100_Tenant1
+  vn-segment 30100
+
+vlan 200
+  name VLAN_200_Tenant1
+  vn-segment 30200
+
+vlan 300
+  name VLAN_300_Tenant2
+  vn-segment 30300
+
+! L3VNI VLANs
+vlan 1001
+  name L3VNI_Tenant1
+  vn-segment 50001
+
+vlan 1002
+  name L3VNI_Tenant2
+  vn-segment 50002
+
+! SVI Configuration with Anycast Gateway
+interface Vlan100
+  description Tenant-1 VLAN 100 Gateway
+  vrf member Tenant-1
+  no shutdown
+  ip address 10.100.0.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan200
+  description Tenant-1 VLAN 200 Gateway
+  vrf member Tenant-1
+  no shutdown
+  ip address 10.200.0.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan300
+  description Tenant-2 VLAN 300 Gateway
+  vrf member Tenant-2
+  no shutdown
+  ip address 10.300.0.1/24
+  fabric forwarding mode anycast-gateway
+
+! L3VNI SVIs
+interface Vlan1001
+  description L3VNI for Tenant-1
+  vrf member Tenant-1
+  no shutdown
+  ip forward
+  no ip redirects
+
+interface Vlan1002
+  description L3VNI for Tenant-2
+  vrf member Tenant-2
+  no shutdown
+  ip forward
+  no ip redirects
+
+! NVE Interface (VXLAN)
+interface nve1
+  no shutdown
+  description VXLAN Overlay Interface
+  host-reachability protocol bgp
+  source-interface loopback1
+  
+  member vni 30100
+    mcast-group 239.1.1.100
+  member vni 30200
+    mcast-group 239.1.1.200
+  member vni 30300
+    mcast-group 239.1.1.300
+  
+  member vni 50001 associate-vrf
+  member vni 50002 associate-vrf
+
+! BGP EVPN Configuration
+router bgp 65001
+  router-id 10.255.255.11
+  address-family l2vpn evpn
+  
+  ! BGP neighbors (Spine switches)
+  neighbor 10.255.255.1
+    remote-as 65001
+    description Spine-01
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community extended
+  
+  neighbor 10.255.255.2
+    remote-as 65001
+    description Spine-02
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community extended
+  
+  ! VRF BGP configuration
+  vrf Tenant-1
+    address-family ipv4 unicast
+      advertise l2vpn evpn
+      redistribute direct route-map DIRECT-TO-BGP
+  
+  vrf Tenant-2
+    address-family ipv4 unicast
+      advertise l2vpn evpn
+      redistribute direct route-map DIRECT-TO-BGP
+
+! Route-map for redistribution
+route-map DIRECT-TO-BGP permit 10
+  match tag 12345
+
+! EVPN Configuration
+evpn
+  vni 30100 l2
+    rd auto
+    route-target import auto
+    route-target export auto
+  vni 30200 l2
+    rd auto
+    route-target import auto
+    route-target export auto
+  vni 30300 l2
+    rd auto
+    route-target import auto
+    route-target export auto
+
+! Access port configurations (examples)
+interface Ethernet1/1
+  description Server-01
+  switchport mode access
+  switchport access vlan 100
+  spanning-tree port type edge
+  no shutdown
+
+interface Ethernet1/2
+  description Server-02
+  switchport mode access
+  switchport access vlan 200
+  spanning-tree port type edge
+  no shutdown
+
+! vPC port-channel example
+interface port-channel10
+  description Server-03 vPC
+  switchport mode access
+  switchport access vlan 100
+  vpc 10
+
+interface Ethernet1/10
+  description Server-03 NIC1
+  switchport mode access
+  channel-group 10 mode active
+
+! Disable POAP
+no boot poap enable
+
+! System settings
+system switch-role leaf
+
+! SNMP Configuration
+snmp-server community public ro
+snmp-server location DataCenter-1
+
+! Logging
+logging server 192.168.1.100 6
+logging source-interface mgmt0
+logging timestamp milliseconds
+
+! AAA Configuration
+aaa group server tacacs+ TACACS-GROUP
+  server 192.168.1.50
+  use-vrf management
+
+tacacs-server host 192.168.1.50 key 7 <encrypted-key>
+
+aaa authentication login default group TACACS-GROUP local
+aaa authentication login console local
+
+! User accounts
+username admin password 5 <encrypted-password> role network-admin
+username ndfc-admin password 5 <encrypted-password> role network-admin
+
+! SSH Configuration
+ssh key rsa 2048 force
+ssh timeout 300
+
+! Banner
+banner motd #
+************************************************
+* Leaf-01 Switch                               *
+* Authorized Access Only                       *
+* All access is logged and monitored           *
+************************************************
+#
+
+! Save configuration
+end
+copy running-config startup-config

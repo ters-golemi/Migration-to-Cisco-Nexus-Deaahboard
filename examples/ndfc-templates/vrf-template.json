@@ -1,0 +1,81 @@
+{
+  "vrfTemplate": "Default_VRF_Universal",
+  "vrfs": [
+    {
+      "vrfName": "Tenant-1",
+      "displayName": "Tenant 1 VRF",
+      "l3Vni": 50001,
+      "vlanId": 1001,
+      "routeTarget": "auto",
+      "routeDistinguisher": "auto",
+      "description": "VRF for Tenant 1",
+      "vrfExtensionTemplate": "Default_VRF_Extension_Universal",
+      "maxBgpPaths": 4,
+      "maxIBgpPaths": 2,
+      "redistributeStatic": true,
+      "redistributeConnected": true,
+      "redistributeDirectRoute": true,
+      "tag": 12345,
+      "attachedSwitches": [
+        {
+          "switchName": "leaf-01",
+          "role": "leaf",
+          "isAttached": true
+        },
+        {
+          "switchName": "leaf-02",
+          "role": "leaf",
+          "isAttached": true
+        },
+        {
+          "switchName": "leaf-03",
+          "role": "leaf",
+          "isAttached": true
+        },
+        {
+          "switchName": "leaf-04",
+          "role": "leaf",
+          "isAttached": true
+        },
+        {
+          "switchName": "border-leaf-01",
+          "role": "border",
+          "isAttached": true,
+          "externalConnectivity": {
+            "enabled": true,
+            "bgpAsn": 65002,
+            "bgpNeighbor": "172.16.1.1"
+          }
+        }
+      ]
+    },
+    {
+      "vrfName": "Tenant-2",
+      "displayName": "Tenant 2 VRF",
+      "l3Vni": 50002,
+      "vlanId": 1002,
+      "routeTarget": "auto",
+      "routeDistinguisher": "auto",
+      "description": "VRF for Tenant 2",
+      "vrfExtensionTemplate": "Default_VRF_Extension_Universal",
+      "maxBgpPaths": 4,
+      "maxIBgpPaths": 2,
+      "redistributeStatic": true,
+      "redistributeConnected": true,
+      "redistributeDirectRoute": true,
+      "tag": 12345,
+      "attachedSwitches": [
+        {
+          "switchName": "leaf-01",
+          "role": "leaf",
+          "isAttached": true
+        },
+        {
+          "switchName": "leaf-02",
+          "role": "leaf",
+          "isAttached": true
+        }
+      ]
+    }
+  ]
+}

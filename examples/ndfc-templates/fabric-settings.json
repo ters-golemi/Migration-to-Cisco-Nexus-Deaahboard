@@ -1,0 +1,65 @@
+{
+  "fabricName": "DC1-Fabric",
+  "fabricTemplate": "Easy_Fabric",
+  "fabricType": "Switch",
+  "fabricDescription": "Data Center 1 VXLAN EVPN Fabric",
+  "asn": "65001",
+  "replicationMode": "Ingress",
+  "anycastGWMac": "0001.0001.0001",
+  "underlayRouting": "ospf",
+  "overlayRouting": "ebgp",
+  "fabricVlan": 2,
+  "l2VniRange": "30000-39999",
+  "l3VniRange": "50000-59999",
+  "multicastRange": "239.1.1.0-239.1.1.255",
+  "loopback0Range": "10.255.255.0/24",
+  "loopback1Range": "10.255.1.0/24",
+  "underlaySubnet": "10.1.0.0/16",
+  "enabledFeatures": [
+    "VXLAN",
+    "EVPN",
+    "PIM",
+    "VRF-Lite",
+    "BFD",
+    "MACSEC"
+  ],
+  "bgpSettings": {
+    "keepAliveTimer": 3,
+    "holdTimer": 9,
+    "maxPaths": 4,
+    "maxIBgpPaths": 2
+  },
+  "fabricSettings": {
+    "enableScheduledBackup": true,
+    "backupSchedule": "0 2 * * *",
+    "enableComplianceCheck": true,
+    "complianceCheckInterval": 60,
+    "enableTelemetry": true,
+    "telemetryInterval": 60
+  },
+  "ntpServers": [
+    "192.168.1.10",
+    "192.168.1.11"
+  ],
+  "dnsServers": [
+    "8.8.8.8",
+    "8.8.4.4"
+  ],
+  "syslogServers": [
+    {
+      "ip": "192.168.1.100",
+      "port": 514,
+      "severity": 6
+    }
+  ],
+  "snmpSettings": {
+    "enabled": true,
+    "trapServers": [
+      {
+        "ip": "192.168.1.101",
+        "community": "public",
+        "version": "v2c"
+      }
+    ]
+  }
+}
