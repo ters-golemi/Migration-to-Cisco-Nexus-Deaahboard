@@ -1,0 +1,72 @@
+{
+  "networkTemplate": "Default_Network_Universal",
+  "networks": [
+    {
+      "networkName": "VLAN_100",
+      "displayName": "VLAN 100 - Tenant 1 Web",
+      "vlanId": 100,
+      "vni": 30100,
+      "gatewayIp": "10.100.0.1/24",
+      "vrfName": "Tenant-1",
+      "mcastGroup": "239.1.1.100",
+      "enableIR": true,
+      "suppressARP": true,
+      "enableL3OnBorder": true,
+      "routeTarget": "auto",
+      "routeDistinguisher": "auto",
+      "tag": 12345,
+      "description": "Web Tier for Tenant 1",
+      "deploymentMode": "perSwitch",
+      "attachedSwitches": [
+        "leaf-01",
+        "leaf-02",
+        "leaf-03",
+        "leaf-04"
+      ]
+    },
+    {
+      "networkName": "VLAN_200",
+      "displayName": "VLAN 200 - Tenant 1 App",
+      "vlanId": 200,
+      "vni": 30200,
+      "gatewayIp": "10.200.0.1/24",
+      "vrfName": "Tenant-1",
+      "mcastGroup": "239.1.1.200",
+      "enableIR": true,
+      "suppressARP": true,
+      "enableL3OnBorder": true,
+      "routeTarget": "auto",
+      "routeDistinguisher": "auto",
+      "tag": 12345,
+      "description": "Application Tier for Tenant 1",
+      "deploymentMode": "perSwitch",
+      "attachedSwitches": [
+        "leaf-01",
+        "leaf-02",
+        "leaf-03",
+        "leaf-04"
+      ]
+    },
+    {
+      "networkName": "VLAN_300",
+      "displayName": "VLAN 300 - Tenant 2 Web",
+      "vlanId": 300,
+      "vni": 30300,
+      "gatewayIp": "10.300.0.1/24",
+      "vrfName": "Tenant-2",
+      "mcastGroup": "239.1.1.300",
+      "enableIR": true,
+      "suppressARP": true,
+      "enableL3OnBorder": true,
+      "routeTarget": "auto",
+      "routeDistinguisher": "auto",
+      "tag": 12345,
+      "description": "Web Tier for Tenant 2",
+      "deploymentMode": "perSwitch",
+      "attachedSwitches": [
+        "leaf-01",
+        "leaf-02"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+!
+! Cisco Nexus 9000 Series - Spine Switch Configuration Example
+! Role: VXLAN EVPN Spine (Route Reflector)
+! Pre-Migration Configuration
+!
+hostname spine-01
+
+! Features required for VXLAN EVPN and NDFC management
+feature bgp
+feature pim
+feature ospf
+feature interface-vlan
+feature nxapi
+feature bash-shell
+feature ssh
+feature https
+
+! DNS and NTP
+ip domain-name company.local
+dns-server 8.8.8.8 8.8.4.4
+ntp server 192.168.1.10 prefer
+ntp server 192.168.1.11
+
+! Management interface
+interface mgmt0
+  description Management Interface
+  vrf member management
+  ip address 192.168.1.1/24
+  no shutdown
+
+! Management VRF
+vrf context management
+  ip route 0.0.0.0/0 192.168.1.254
+
+! Loopback interfaces
+interface loopback0
+  description Underlay Router ID
+  ip address 10.255.255.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+
+! Underlay P2P interfaces to Leaf switches
+interface Ethernet1/1
+  description To Leaf-01 Eth1/49
+  no switchport
+  mtu 9216
+  medium p2p
+  ip address 10.1.1.1/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/2
+  description To Leaf-02 Eth1/49
+  no switchport
+  mtu 9216
+  medium p2p
+  ip address 10.1.1.5/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/3
+  description To Leaf-03 Eth1/49
+  no switchport
+  mtu 9216
+  medium p2p
+  ip address 10.1.1.9/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/4
+  description To Leaf-04 Eth1/49
+  no switchport
+  mtu 9216
+  medium p2p
+  ip address 10.1.1.13/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+! OSPF Underlay Routing
+router ospf UNDERLAY
+  router-id 10.255.255.1
+
+! PIM Configuration for Multicast Underlay (if using multicast replication)
+ip pim rp-address 10.255.255.254 group-list 239.0.0.0/8
+ip pim ssm range 232.0.0.0/8
+
+! BGP EVPN Configuration (Route Reflector)
+router bgp 65001
+  router-id 10.255.255.1
+  address-family l2vpn evpn
+    retain route-target all
+  
+  ! BGP neighbors (Leaf switches)
+  neighbor 10.255.255.11
+    remote-as 65001
+    description Leaf-01
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community extended
+      route-reflector-client
+  
+  neighbor 10.255.255.12
+    remote-as 65001
+    description Leaf-02
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community extended
+      route-reflector-client
+  
+  neighbor 10.255.255.13
+    remote-as 65001
+    description Leaf-03
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community extended
+      route-reflector-client
+  
+  neighbor 10.255.255.14
+    remote-as 65001
+    description Leaf-04
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community extended
+      route-reflector-client
+
+! Disable POAP (required for NDFC discovery)
+no boot poap enable
+
+! System settings
+system switch-role spine
+
+! SNMP Configuration
+snmp-server community public ro
+snmp-server location DataCenter-1
+
+! Logging
+logging server 192.168.1.100 6
+logging source-interface mgmt0
+logging timestamp milliseconds
+
+! AAA Configuration
+aaa group server tacacs+ TACACS-GROUP
+  server 192.168.1.50
+  use-vrf management
+
+tacacs-server host 192.168.1.50 key 7 <encrypted-key>
+
+aaa authentication login default group TACACS-GROUP local
+aaa authentication login console local
+
+! User accounts
+username admin password 5 <encrypted-password> role network-admin
+username ndfc-admin password 5 <encrypted-password> role network-admin
+
+! SSH Configuration
+ssh key rsa 2048 force
+ssh timeout 300
+
+! Banner
+banner motd #
+************************************************
+* Spine-01 Switch                              *
+* Authorized Access Only                       *
+* All access is logged and monitored           *
+************************************************
+#
+
+! Save configuration
+end
+copy running-config startup-config
