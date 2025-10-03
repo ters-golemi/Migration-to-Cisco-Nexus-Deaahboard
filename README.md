@@ -38,6 +38,10 @@ This repository contains the following documentation:
 
 ## Quick Start
 
+**New to this guide?** Start with the [**Quick Start Guide**](QUICKSTART.md) for a 5-minute overview!
+
+### For Immediate Action:
+
 1. Review the [Prerequisites](docs/prerequisites.md) document
 2. Complete the [Pre-Migration Checklist](docs/pre-migration-checklist.md)
 3. Follow the [Migration Plan](docs/migration-plan.md) step-by-step
