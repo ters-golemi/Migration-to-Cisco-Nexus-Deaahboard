@@ -210,25 +210,25 @@ Emergency procedures:
 ## Best Practices
 
 ### Before You Start
-✅ Test in lab environment first
-✅ Complete all backups
-✅ Document current state
-✅ Get team buy-in
-✅ Schedule adequate time
+- Test in lab environment first
+- Complete all backups
+- Document current state
+- Get team buy-in
+- Schedule adequate time
 
 ### During Migration
-✅ Follow the plan
-✅ Validate each step
-✅ Keep stakeholders informed
-✅ Document changes
-✅ Have rollback ready
+- Follow the plan
+- Validate each step
+- Keep stakeholders informed
+- Document changes
+- Have rollback ready
 
 ### After Migration
-✅ Complete validation
-✅ Monitor for 24 hours
-✅ Train operations team
-✅ Update documentation
-✅ Conduct lessons learned
+- Complete validation
+- Monitor for 24 hours
+- Train operations team
+- Update documentation
+- Conduct lessons learned
 
 ## Success Criteria
 
@@ -246,19 +246,19 @@ Your migration is successful when:
 
 Choose your path:
 
-### 🎯 Ready to Start?
+###  Ready to Start?
 → Go to [Prerequisites](docs/prerequisites.md)
 
-### 📋 Need to Plan?
+###  Need to Plan?
 → Go to [Migration Plan](docs/migration-plan.md)
 
-### 🔧 Ready to Configure?
+###  Ready to Configure?
 → Go to [Configuration Guide](docs/configuration-guide.md)
 
-### ❓ Have Questions?
+###  Have Questions?
 → Go to [Troubleshooting Guide](docs/troubleshooting.md)
 
-### 🚨 Need to Rollback?
+###  Need to Rollback?
 → Go to [Rollback Procedures](docs/rollback-procedures.md)
 
 ## Document Updates
@@ -277,6 +277,6 @@ Found an issue or have a suggestion? Please:
 
 ---
 
-**Good luck with your migration!** 🚀
+**Good luck with your migration!** 
 
 Remember: Take your time, validate each step, and don't hesitate to ask for help when needed.
